@@ -1,0 +1,1 @@
+This is where i will be practicing Python. Inside, you'll find various exercises, scripts, and small projects—ranging from basic data structures like tuples and dictionaries to more advanced concepts that i will learn along the way. It serves as a visual log of my progress as I refine my coding logic and problem-solving skills.
