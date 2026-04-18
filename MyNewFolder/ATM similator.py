@@ -1,7 +1,13 @@
 class Account:
-    def __init__(self, account_id, starting_balance):
+#     making the pin
+    def __init__(self, account_id, initial_balance, pin):
         self.account_id = account_id
-        self.balance = starting_balance
+        self.balance = initial_balance
+        self.pin = pin  # Storing the pin for a specific account
+
+    def verify_pin(self, entered_pin):
+        #chech if the pin matches the account
+        return self.pin == entered_pin
 
     def deposit(self, amount):
         if amount > 0:
@@ -17,7 +23,7 @@ class Account:
 
 
 class ATM:
-    #USER INTERFACE
+    """Manages secure access to multiple Account objects."""
     def __init__(self):
         self.accounts = []
         self.current_account = None
@@ -26,26 +32,49 @@ class ATM:
         print("--- WELCOME ---")
         while len(self.accounts) < 5:
             try:
-                val = input(f"Enter starting balance for account {len(self.accounts)+1}: ").strip()
-                balance = int(val)
+                print(f"\nSetting up Account {len(self.accounts)+1}")
+                bal_val = input("Enter starting balance: ").strip()
+                balance = int(bal_val)
                 if balance < 0:
                     print("Balance cannot be negative.")
                     continue
-                # Create and store an Account object
-                new_account = Account(len(self.accounts) + 1, balance)
-                self.accounts.append(new_account)
+                
+                pin = input("Set a 4-digit PIN for this account: ").strip()
+                if len(pin) != 4 or not pin.isdigit():
+                    print("PIN must be exactly 4 digits.")
+                    continue
+
+                self.accounts.append(Account(len(self.accounts) + 1, balance, pin))
             except ValueError:
-                print("Invalid input. Please enter a whole number.")
+                print("Invalid input. Please enter a whole number for the balance.")
 
     def select_account(self):
         while True:
             try:
                 choice = int(input(f"\nSelect account (1-5): "))
                 if 1 <= choice <= 5:
-                    self.current_account = self.accounts[choice - 1]
-                    print(f"Switched to Account {choice}")
-                    break
-                print("Invalid selection. Choose 1-5.")
+                    selected = self.accounts[choice - 1]
+                    
+                    # Check: make sure the PIN is correct before giving access
+                    attempts = 0
+                    authenticated = False
+                    while attempts < 3:
+                        entered_pin = input(f"Enter PIN for Account {choice}: ").strip()
+                        if selected.verify_pin(entered_pin):
+                            self.current_account = selected
+                            print("Access Granted.")
+                            authenticated = True
+                            break
+                        else:
+                            attempts += 1
+                            print(f"Incorrect PIN. Attempts remaining: {3 - attempts}")
+                    
+                    if authenticated:
+                        break
+                    else:
+                        print("Too many failed attempts. Please select a different account or try again later.")
+                else:
+                    print("Invalid selection. Choose 1-5.")
             except ValueError:
                 print("Please enter a valid number.")
 
